@@ -26,7 +26,7 @@ public class SortVisualizer extends JFrame {
         setTitle("Sort Visualizer");
         setSize(WIDTH, HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JLabel instructionLabel = new JLabel("S: Selection Sort | B: Bubble Sort | I: Insertion Sort | M: Merge Sort | R: Reset");
+        JLabel instructionLabel = new JLabel("S: Selection Sort | B: Bubble Sort | I: Insertion Sort | M: Merge Sort | Q: Quick Sort | R: Reset");
         instructionLabel.setFont(new Font("Helvetica", Font.PLAIN, 15)); // Make font smaller
         JPanel instructionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         instructionPanel.add(instructionLabel);
@@ -63,19 +63,22 @@ public class SortVisualizer extends JFrame {
                             insertionSort();
                             running = false;
                         }).start();
-                    }
-                    else if (e.getKeyCode() == KeyEvent.VK_M) {
+                    } else if (e.getKeyCode() == KeyEvent.VK_M) {
                         running = true;
                         new Thread(() -> {
                             mergeSort(0, LENGTH - 1);
+                            running = false;
+                        }).start();
+                    } else if (e.getKeyCode() == KeyEvent.VK_Q) {
+                        running = true;
+                        new Thread(() -> {
+                            quickSort(0, LENGTH - 1);
                             running = false;
                         }).start();
                     }
                 }
             }
         });
-
-        // Request focus for the panel when the frame is first shown
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
@@ -83,6 +86,87 @@ public class SortVisualizer extends JFrame {
             }
         });
     }
+
+    private int partition(int left, int right) {
+        int pivot = sizes[right];
+        curr = right;
+
+        try {
+            SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+            Thread.sleep(100);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        int i = left - 1;
+
+        for (int j = left; j <= right - 1; j++) {
+            curr = j;
+            smallIndex = right;
+
+            try {
+                SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+                Thread.sleep(25);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (sizes[j] <= pivot) {
+                i++;
+                curr = i;
+                smallIndex = j;
+
+                swap(i, j);
+
+                try {
+                    SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+                    Thread.sleep(25);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        swap(i + 1, right);
+        curr = i + 1;
+        smallIndex = right;
+
+        try {
+            SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+            Thread.sleep(25);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return i + 1;
+    }
+
+    public void quickSort(int left, int right) {
+        if (left < right) {
+            curr = left;
+            smallIndex = right;
+
+            try {
+                SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+                Thread.sleep(25);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            int pivotIndex = partition(left, right);
+
+            quickSort(left, pivotIndex - 1);
+            quickSort(pivotIndex + 1, right);
+        }
+
+        try {
+            SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+            Thread.sleep(25);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void selectionSort() {
         curr = 0;
