@@ -26,7 +26,8 @@ public class SortVisualizer extends JFrame {
         setTitle("Sort Visualizer");
         setSize(WIDTH, HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JLabel instructionLabel = new JLabel("S: Selection Sort | B: Bubble Sort | I: Insertion Sort | M: Merge Sort | Q: Quick Sort | R: Reset");
+        JLabel instructionLabel = new JLabel("S: Selection Sort | B: Bubble Sort | I: Insertion Sort " +
+                "| M: Merge Sort | Q: Quick Sort | H: Heap Sort | R: Reset");
         instructionLabel.setFont(new Font("Helvetica", Font.PLAIN, 15)); // Make font smaller
         JPanel instructionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         instructionPanel.add(instructionLabel);
@@ -75,6 +76,12 @@ public class SortVisualizer extends JFrame {
                             quickSort(0, LENGTH - 1);
                             running = false;
                         }).start();
+                    } else if (e.getKeyCode() == KeyEvent.VK_H) {
+                        running = true;
+                        new Thread(() -> {
+                            heapSort();
+                            running = false;
+                        }).start();
                     }
                 }
             }
@@ -85,6 +92,98 @@ public class SortVisualizer extends JFrame {
                 sortPanel.requestFocusInWindow();
             }
         });
+    }
+
+    private void heapify(int n, int i) {
+        int largest = i;
+        int l = 2 * i + 1;
+        int r = 2 * i + 2;
+        curr = i;
+        smallIndex = l < n ? l : (r < n ? r : i);
+
+        try {
+            SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+            Thread.sleep(25);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (l < n && sizes[l] > sizes[largest]) {
+            largest = l;
+
+            curr = l;
+            smallIndex = i;
+            try {
+                SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+                Thread.sleep(25);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (r < n && sizes[r] > sizes[largest]) {
+            largest = r;
+
+            curr = r;
+            smallIndex = i;
+            try {
+                SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+                Thread.sleep(25);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (largest != i) {
+            curr = i;
+            smallIndex = largest;
+            swap(i, largest);
+
+            try {
+                SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+                Thread.sleep(25);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            heapify(n, largest);
+        }
+    }
+
+    public void heapSort() {
+        for (int i = sizes.length / 2 - 1; i >= 0; i--) {
+            curr = i;
+            smallIndex = sizes.length - 1;
+
+            try {
+                SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+                Thread.sleep(25);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            heapify(sizes.length, i);
+        }
+
+        for (int i = sizes.length - 1; i > 0; i--) {
+            curr = 0;
+            smallIndex = i;
+            swap(0, i);
+
+            try {
+                SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+                Thread.sleep(25);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            heapify(i, 0);
+        }
+
+        try {
+            SwingUtilities.invokeAndWait(() -> sortPanel.repaint());
+            Thread.sleep(25);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private int partition(int left, int right) {
